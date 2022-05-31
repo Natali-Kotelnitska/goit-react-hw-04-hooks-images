@@ -1,126 +1,153 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import fetchImages from 'services/images-api';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Modal from './Modal';
-import Searchbar from './Searchbar/Searchbar';
+import { Searchbar } from './Searchbar/Searchbar';
+// import Searchbar from './Searchbar/Searchbar';
 import Button from './ui/Button/Button';
 import mapper from './utils/mapper';
 import Error from './ui/Error/Error';
 import Loader from './ui/Loader/Loader';
 
-export default class App extends Component {
-  state = {
-    searchQuery: '',
-    images: [],
-    page: 1,
-    showModal: false,
-    loading: false,
-    largeImage: '',
-    tag: '',
-    error: null,
-  };
+export const App = () => {
+  const [searchQuery, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [showModal, setModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [largeImage, setLargeImage] = useState('');
+  const [tag, setTag] = useState('');
+  const [error, setError] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    const { searchQuery, page } = this.state;
+  // export default class App extends Component {
+  //   state = {
+  //     searchQuery: '',
+  //     images: [],
+  //     page: 1,
+  //     showModal: false,
+  //     loading: false,
+  //     largeImage: '',
+  //     tag: '',
+  //     error: null,
+  //   };
 
-    if (prevState.searchQuery !== searchQuery || prevState.page !== page) {
-      this.setState({ loading: true });
-      this.fetchGallery();
-    }
-  }
+  // useEffect(() => {
+  //   setImages([]);
+  // }, []);
 
-  fetchGallery = () => {
-    const { searchQuery, page } = this.state;
-
+  const fetchGallery = (searchQuery, page) => {
+    //     const { searchQuery, page } = this.state;
     fetchImages(searchQuery, page)
       .then(res => {
         const nextImages = mapper(res.data.hits);
 
         if (!res.data.hits.length) {
-          this.setState({ images: [] });
-
+          setImages([]);
+          // this.setState({ images: [] });
           toast.error('Sorry, image not found.');
           return;
         }
 
-        this.setState(prevState => ({
-          images: [...prevState.images, ...nextImages],
-        }));
+        setImages(prevState => [...prevState, ...nextImages]);
+        // this.setState(prevState => ({
+        //   images: [...prevState.images, ...nextImages],
+        // }));
       })
       .catch(error => {
-        this.setState({ error });
+        setError();
+        // this.setState({ error });
         toast.error('Something went wrong');
       })
-      .finally(() => this.setState({ loading: false }));
+      .finally(() => setLoading(false));
+    // .finally(() => this.setState({ loading: false }));
   };
 
-  handleFormSubmit = searchQuery => {
-    this.setState({ page: 1, images: [], searchQuery });
+  useEffect(() => {
+    setLoading(true);
+    fetchGallery(searchQuery, page);
+  }, [searchQuery, page]);
+  //   componentDidUpdate(prevProps, prevState) {
+  //     const { searchQuery, page } = this.state;
+  //     if (prevState.searchQuery !== searchQuery || prevState.page !== page) {
+  //       this.setState({ loading: true });
+  //       this.fetchGallery();
+  //     }
+  //   }
+
+  const handleFormSubmit = searchQuery => {
+    setQuery(searchQuery);
+    setPage(1);
+    setImages([]);
+    // this.setState({ page: 1, images: [], searchQuery });
+  };
+  //   handleFormSubmit = searchQuery => {
+  //     this.setState({ page: 1, images: [], searchQuery });
+  //   };
+
+  const onLoadBtnClick = () => {
+    setPage(prevPage => prevPage + 1);
+  };
+  //   onLoadBtnClick = () => {
+  //     this.setState(prevState => ({
+  //       page: prevState.page + 1,
+  //     }));
+  //   };
+
+  const toggleModal = () => {
+    setModal(!showModal);
+    // this.setState(({ showModal }) => ({
+    //   showModal: !showModal,
+    // }));
   };
 
-  onLoadBtnClick = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const openModal = (tag, largeImageURL) => {
+    toggleModal();
+    setLargeImage(largeImageURL);
+    setTag(tag);
+    // this.setState({
+    //   largeImage: largeImageURL,
+    //   tag: tag,
+    // });
   };
+  //   render() {
+  //     const { images, showModal, loading, error, largeImage, tag } = this.state;
 
-  openModal = (tag, largeImageURL) => {
-    this.toggleModal();
-    this.setState({
-      largeImage: largeImageURL,
-      tag: tag,
-    });
-  };
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gridGap: '16px',
+        paddingBottom: '24px',
+      }}
+    >
+      <Searchbar onSubmit={handleFormSubmit} />
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-
-  render() {
-    const { images, showModal, loading, error, largeImage, tag } = this.state;
-
-    return (
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          gridGap: '16px',
-          paddingBottom: '24px',
-        }}
-      >
-        <Searchbar onSubmit={this.handleFormSubmit} />
-
-        {error && <Error message={error.message} />}
-        {images.length && (
-          <ImageGallery images={images} onOpenModal={this.openModal} />
-        )}
-        {/* <ImageGallery images={images} onOpenModal={this.openModal} /> */}
-        {loading && <Loader />}
-        {images.length > 11 && <Button onBtnClick={this.onLoadBtnClick} />}
-        {showModal && (
-          <Modal
-            largeImg={largeImage}
-            altTag={tag}
-            onModalClick={this.toggleModal}
-          />
-        )}
-        <ToastContainer
-          position="top-right"
-          theme="colored"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-      </div>
-    );
-  }
-}
+      {error && <Error message={error.message} />}
+      {images.length && (
+        <ImageGallery images={images} onOpenModal={openModal} />
+      )}
+      {/* <ImageGallery images={images} onOpenModal={this.openModal} /> */}
+      {loading && <Loader />}
+      {images.length > 11 && <Button onBtnClick={onLoadBtnClick} />}
+      {showModal && (
+        <Modal largeImg={largeImage} altTag={tag} onModalClick={toggleModal} />
+      )}
+      <ToastContainer
+        position="top-right"
+        theme="colored"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </div>
+  );
+};
+// }
