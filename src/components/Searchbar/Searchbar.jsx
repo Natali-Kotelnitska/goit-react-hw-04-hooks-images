@@ -2,7 +2,7 @@ import { FcSearch } from 'react-icons/fc';
 import { toast } from 'react-toastify';
 import PropTypes from 'prop-types';
 import s from './Searchbar.module.css';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const Searchbar = ({ onSubmit }) => {
   const [searchQuery, setSearchQuery] = useState('');
