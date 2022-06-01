@@ -1,28 +1,18 @@
 import { FcSearch } from 'react-icons/fc';
 import { toast } from 'react-toastify';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import s from './Searchbar.module.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const Searchbar = ({ onSubmit }) => {
-  //   static propTypes = {
-  //     onSubmit: PropTypes.func,
-  //   };
   const [searchQuery, setSearchQuery] = useState('');
-  //   state = {
-  //     searchQuery: '',
-  //   };
-  // console.log(onSubmit);
+
   const handleQueryChange = e => {
     const searchValue = e.currentTarget.value.toLowerCase();
     setSearchQuery(searchValue);
-    // this.setState({ searchQuery: searchValue });
   };
 
   const handleSubmit = e => {
-    // const { onSubmit } = this.props;
-    // const { searchQuery } = this.state;
-
     e.preventDefault();
 
     if (searchQuery.trim() === '') {
@@ -30,14 +20,9 @@ export const Searchbar = ({ onSubmit }) => {
     }
     onSubmit(searchQuery);
     setSearchQuery('');
-    // this.setState({
-    //   searchQuery: e.target.elements.searchQuery.value,
-    // });
-    // this.setState({ searchQuery: '' });
+    //searchQuery: e.target.elements.searchQuery.value
   };
 
-  //   render() {
-  //     const { searchQuery } = this.state;
   return (
     <header className={s.searchbar}>
       <form onSubmit={handleSubmit} className={s.searchForm}>
@@ -59,5 +44,8 @@ export const Searchbar = ({ onSubmit }) => {
       </form>
     </header>
   );
-  //   }
+};
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
 };

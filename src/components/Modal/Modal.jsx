@@ -1,43 +1,41 @@
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
 import s from './Modal.module.css';
 
-export default class Modal extends Component {
-  static propTypes = {
-    onModalClick: PropTypes.func.isRequired,
-    largeImg: PropTypes.string.isRequired,
-    altTag: PropTypes.string.isRequired,
-  };
+const Modal = ({ onModalClick, largeImg, altTag }) => {
+  useEffect(() => {
+    const handleKeyDown = e => {
+      if (e.code === 'Escape') {
+        onModalClick();
+      }
+    };
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onModalClick]);
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
-  }
-
-  handleKeyDown = e => {
-    if (e.code === 'Escape') {
-      this.props.onModalClick();
-    }
-  };
-
-  // onOverlayClick = e => {
+  // const onOverlayClick = e => {
   //   if (e.target === e.currentTarget) {
   //     this.props.onModalClick();
   //   }
   // };
 
-  render() {
-    const { onModalClick, largeImg, altTag } = this.props;
-    return (
-      <div className={s.overlay} onClick={() => onModalClick()}>
-        <div className={s.modal}>
-          {/* {this.props.children} */}
-          <img src={largeImg} alt={altTag} className={s.modalImg} />
-        </div>
+  return (
+    <div className={s.overlay} onClick={() => onModalClick()}>
+      <div className={s.modal}>
+        {/* {this.props.children} */}
+        <img src={largeImg} alt={altTag} className={s.modalImg} />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+Modal.propTypes = {
+  onModalClick: PropTypes.func.isRequired,
+  largeImg: PropTypes.string.isRequired,
+  altTag: PropTypes.string.isRequired,
+};
+
+export default Modal;
