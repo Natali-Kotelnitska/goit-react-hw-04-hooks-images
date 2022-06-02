@@ -12,13 +12,33 @@ import Loader from './ui/Loader/Loader';
 
 export const App = () => {
   const [searchQuery, setQuery] = useState('');
-  const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
-  const [showModal, setModal] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState([]);
   const [largeImage, setLargeImage] = useState('');
   const [tag, setTag] = useState('');
+  const [showModal, setModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleFormSubmit = searchQuery => {
+    setQuery(searchQuery);
+    setPage(1);
+    setImages([]);
+  };
+
+  const onLoadBtnClick = () => {
+    setPage(prevPage => prevPage + 1);
+  };
+
+  const toggleModal = () => {
+    setModal(!showModal);
+  };
+
+  const openModal = (tag, largeImageURL) => {
+    toggleModal();
+    setLargeImage(largeImageURL);
+    setTag(tag);
+  };
 
   const fetchGallery = (searchQuery, page) => {
     fetchImages(searchQuery, page)
@@ -48,26 +68,6 @@ export const App = () => {
     fetchGallery(searchQuery, page);
   }, [searchQuery, page]);
 
-  const handleFormSubmit = searchQuery => {
-    setQuery(searchQuery);
-    setPage(1);
-    setImages([]);
-  };
-
-  const onLoadBtnClick = () => {
-    setPage(prevPage => prevPage + 1);
-  };
-
-  const toggleModal = () => {
-    setModal(!showModal);
-  };
-
-  const openModal = (tag, largeImageURL) => {
-    toggleModal();
-    setLargeImage(largeImageURL);
-    setTag(tag);
-  };
-
   return (
     <div
       style={{
@@ -83,7 +83,6 @@ export const App = () => {
       {images.length && (
         <ImageGallery images={images} onOpenModal={openModal} />
       )}
-      {/* <ImageGallery images={images} onOpenModal={this.openModal} /> */}
       {loading && <Loader />}
       {images.length > 11 && <Button onBtnClick={onLoadBtnClick} />}
       {showModal && (
